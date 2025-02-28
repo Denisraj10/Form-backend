@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const multer = require("multer");
 const dotenv = require("dotenv");
 
+
 dotenv.config();
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//mongodb
+// mongodb
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -21,10 +22,8 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
 
 const StudentSchema = new mongoose.Schema({
   name: String,
@@ -46,10 +45,34 @@ const StudentSchema = new mongoose.Schema({
   residentLastYear: String,
   previousHostelName: String,
   previousHostelPlace: String,
-  image: String, 
+  image: String,
 });
 
 const Student = mongoose.model("Student", StudentSchema);
+
+
+
+
+
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const adminEmail = "kolass@gmail.com";
+  const adminPassword = "denis";
+
+  if (email === adminEmail && password === adminPassword) {
+    return res.json({ message: "Admin login successful", role: "admin" });
+  }
+  if (email && password) {
+    return res.json({ message: "User login successful", role: "user" });
+  }
+
+  res.status(401).json({ error: "Invalid credentials" });
+});
+
+
+
 
 
 app.post("/addForm", upload.single("image"), async (req, res) => {
@@ -71,6 +94,11 @@ app.post("/addForm", upload.single("image"), async (req, res) => {
   }
 });
 
+
+
+
+
+
 app.get("/getForms", async (req, res) => {
   try {
     const students = await Student.find();
@@ -80,6 +108,8 @@ app.get("/getForms", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
 
 
 const PORT = process.env.PORT || 5000;
